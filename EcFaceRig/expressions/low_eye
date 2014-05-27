@@ -1,0 +1,11 @@
+rt_low_eye_inner_L.tx = lf_low_eye_inner_L.tx * -1;
+rt_low_eye_mid_L.tx = lf_low_eye_mid_L.tx * -1;
+rt_low_eye_outer_L.tx = lf_low_eye_outer_L.tx * -1;
+
+rt_low_eye_inner_L.ty = lf_low_eye_inner_L.ty;
+rt_low_eye_mid_L.ty = lf_low_eye_mid_L.ty;
+rt_low_eye_outer_L.ty = lf_low_eye_outer_L.ty;
+
+rt_low_eye_inner_L.tz = lf_low_eye_inner_L.tz;
+rt_low_eye_mid_L.tz = lf_low_eye_mid_L.tz;
+rt_low_eye_outer_L.tz = lf_low_eye_outer_L.tz;

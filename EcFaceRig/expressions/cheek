@@ -1,0 +1,15 @@
+rt_upper_cheek_L.tx = lf_upper_cheek_L.tx*-1;
+rt_upper_cheek_L.ty = lf_upper_cheek_L.ty;
+rt_upper_cheek_L.tz = lf_upper_cheek_L.tz;
+
+rt_outer_cheek_L.tx = lf_outer_cheek_L.tx*-1;
+rt_outer_cheek_L.ty = lf_outer_cheek_L.ty;
+rt_outer_cheek_L.tz = lf_outer_cheek_L.tz;
+
+rt_nose_L.tx = lf_nose_L.tx*-1;
+rt_nose_L.ty = lf_nose_L.ty;
+rt_nose_L.tz = lf_nose_L.tz;
+
+rt_low_cheek_L.tx = lf_low_cheek_L.tx*-1;
+rt_low_cheek_L.ty = lf_low_cheek_L.ty;
+rt_low_cheek_L.tz = lf_low_cheek_L.tz;

@@ -1,0 +1,11 @@
+rt_mouth_up_outermid_L.tx = lf_mouth_up_outermid_L.tx*-1;
+rt_mouth_up_outermid_L.ty = lf_mouth_up_outermid_L.ty;
+rt_mouth_up_outermid_L.tz = lf_mouth_up_outermid_L.tz;
+
+rt_mouth_up_innermid_L.tx = lf_mouth_up_innermid_L.tx*-1;
+rt_mouth_up_innermid_L.ty = lf_mouth_up_innermid_L.ty;
+rt_mouth_up_innermid_L.tz = lf_mouth_up_innermid_L.tz;
+
+rt_mouth_outer_L.tx = lf_mouth_outer_L.tx*-1;
+rt_mouth_outer_L.ty = lf_mouth_outer_L.ty;
+rt_mouth_outer_L.tz = lf_mouth_outer_L.tz;

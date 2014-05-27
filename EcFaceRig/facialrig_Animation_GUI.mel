@@ -1,0 +1,770 @@
+//Global Vars
+$imagePath = "C:\\Users\\Evan\\My Pictures\\facerig\\";
+
+
+//GUI Control for Loading
+global proc ecImportWindow(){
+
+}
+
+//GUI Control for Exporting
+global proc ecExportWindow(){
+	if(`window -ex "export"`) {
+    deleteUI "export";
+	}
+ window -title "Save Pose" -widthHeight 200 100 export;
+ 	rowLayout -numberOfColumns 2;
+ 		columnLayout;
+ 		button -label "Save" -command "ecDataExport; deleteUI \"export\";";
+ 			setParent..;
+ 		columnLayout;
+ 		button -label "Cancel" -command "deleteUI \"export\";";
+ 			setParent..;
+ showWindow "export";
+
+}
+//Currently battling with error reports in Maya from the below code till l-34 (can't open file, maybe need to create the file first??)
+global proc ecDataExport(){
+	sysFile -makeDir "C:\\Users\\Evan\\My Pictures\\facerig\\MEL";
+ 	string $blends[] = {"mouthup_M" , "mouthup_Lft" , "mouthup_Rgt"};
+ 	string $myStrArray[];
+ 		for($i = 0 ; $i < `size $blends` ; $i++){
+ 			$myStrArray[$i] = $blends[$i];
+ 			print $myStrArray[$i];
+ 		}
+	string $filePath = "C:\\Users\\Evan\\My Pictures\\facerig\\MEL\\testFile_v01.txt" ;   
+	$fileId = `fopen $filePath "w"` ;    
+	for($line in $myStrArray){
+		fprint $fileId ($line+"\n");  
+	}
+	fclose $fileId ;  
+	print "exported";
+}
+
+global proc ecKey(int $all){
+	string $Mouthblendnodes[] = {"mouthup_M" , "mouthup_Lft" , "mouthup_Rgt" , "mouthdown_M" , "mouthdown_Lft" , "mouthdown_Rgt" , "mouth_height_M" , "mouth_height_Lft" , "mouth_height_Rgt" , "mouth_width_M" , "mouth_width_Lft" , "mouth_width_Rgt" , "mouth_narrow_M" , "mouth_narrow_Lft" , "mouth_narrow_Rgt" , "mouthcornerdepth_M" , "mouthcornerdepth_Lft" , "mouthcornerdepth_Rgt", "lipup_M" , "lipup_Lft" , "lipup_Rgt" , "lipdown_M" , "lipdown_Lft" , "lipdown_Rgt" , "lipsin_up_M" , "lipsin_up_Lft" , "lipsin_up_Rgt" , "lipsin_low_M" , "lipsin_low_Lft" , "lipsin_low_Rgt" , "lipsout_up_M" , "lipsout_up_Lft" , "lipsout_up_Rgt" , "lipsout_low_M" , "lipsout_low_Lft" , "lipsout_low_Rgt"};
+	string $Faceblendnodes[] = {"browmidheight_M" , "browmidheight_Lft" , "browmidheight_Rgt" , "browouterheight_M" , "browouterheight_Rgt" , "browouterheight_Lft" , "brow_squeeze_M" , "brow_squeeze_Lft" , "brow_squeeze_Rgt" , "nosewrinkle_M" , "nosewrinkle_Lft" , "nosewrinkle_Rgt" , "cheekflex_M" , "cheekflex_Lft" , "cheekflex_Rgt" , "sneer_M" , "sneer_Lft" , "sneer_Rgt"};
+	
+	if($all == 1){
+					for ($i = 0; $i < `size $Mouthblendnodes`; $i++){
+				setKeyframe ("Mouth_Morph." + $Mouthblendnodes[$i]);
+				}
+			
+
+			for ($i = 0; $i < `size $Faceblendnodes`; $i++){
+				setKeyframe ("Face_Morph." + $Faceblendnodes[$i]);
+				}
+    setKeyframe cn_head_low_jaw_jnt;
+
+    ecKeyPhoneme;
+    ecOffsets("keyall" , "null");
+	}
+
+
+	else if($all == 2){
+		//Just Face
+			for ($i = 0; $i < `size $Faceblendnodes`; $i++){
+		setKeyframe ("Face_Morph." + $Faceblendnodes[$i]);
+		}
+	}
+
+	else if($all == 3){
+		//Just Mouth
+			for ($i = 0; $i < `size $Mouthblendnodes`; $i++){
+		setKeyframe ("Mouth_Morph." + $Mouthblendnodes[$i]);
+		}
+	}
+
+	else{
+		print "rats";
+	}
+
+}
+
+//Zero out controls V
+global proc ecZero(int $all , string $attribute){
+	string $Mouthblendnodes[] = {"mouthup_M" , "mouthup_Lft" , "mouthup_Rgt" , "mouthdown_M" , "mouthdown_Lft" , "mouthdown_Rgt" , "mouth_height_M" , "mouth_height_Lft" , "mouth_height_Rgt" , "mouth_width_M" , "mouth_width_Lft" , "mouth_width_Rgt" , "mouth_narrow_M" , "mouth_narrow_Lft" , "mouth_narrow_Rgt" , "mouthcornerdepth_M" , "mouthcornerdepth_Lft" , "mouthcornerdepth_Rgt", "lipup_M" , "lipup_Lft" , "lipup_Rgt" , "lipdown_M" , "lipdown_Lft" , "lipdown_Rgt" , "lipsin_up_M" , "lipsin_up_Lft" , "lipsin_up_Rgt" , "lipsin_low_M" , "lipsin_low_Lft" , "lipsin_low_Rgt" , "lipsout_up_M" , "lipsout_up_Lft" , "lipsout_up_Rgt" , "lipsout_low_M" , "lipsout_low_Lft" , "lipsout_low_Rgt"};
+	string $Faceblendnodes[] = {"browmidheight_M" , "browmidheight_Lft" , "browmidheight_Rgt" , "browouterheight_M" , "browouterheight_Rgt" , "browouterheight_Lft" , "brow_squeeze_M" , "brow_squeeze_Lft" , "brow_squeeze_Rgt" , "nosewrinkle_M" , "nosewrinkle_Lft" , "nosewrinkle_Rgt" , "cheekflex_M" , "cheekflex_Lft" , "cheekflex_Rgt" , "sneer_M" , "sneer_Lft" , "sneer_Rgt"};
+	string $Jaw[] = {"cn_head_low_jaw_jnt"};
+
+	if($all == 1){
+					for ($i = 0; $i < `size $Mouthblendnodes`; $i++){
+				setAttr ("Mouth_Morph." + $Mouthblendnodes[$i]) 0.0;
+				}
+			
+
+			for ($i = 0; $i < `size $Faceblendnodes`; $i++){
+				setAttr ("Face_Morph." + $Faceblendnodes[$i]) 0.0;
+				}
+
+				setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 0.0;
+        ecPhoneme("null");
+        ecOffsets("zeroall" , "null");
+	}
+
+	else if($all == 2){
+		//Just Face
+			for ($i = 0; $i < `size $Faceblendnodes`; $i++){
+		setAttr ("Face_Morph." + $Faceblendnodes[$i]) 0.0;
+		}
+	}
+
+	else if($all == 3){
+		//Just Mouth
+			for ($i = 0; $i < `size $Mouthblendnodes`; $i++){
+		setAttr ("Mouth_Morph." + $Mouthblendnodes[$i]) 0.0;
+		}
+	}
+
+	else if($all == 4){
+		//Just jaw
+		setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 0.0;
+	}
+
+	else{
+		setAttr $attribute 0.0;
+	}
+
+}
+
+global proc ecPhoneme(string $animPhoneme){
+  string $phonemeList[] = {"PhonemeController.OO" , "PhonemeController.R" , "PhonemeController.IH" , "PhonemeController.EE" , "PhonemeController.SH" , "PhonemeController.F" , "PhonemeController.TH" , "PhonemeController.AH" , "PhonemeController.EH"};
+  for ($i = 0; $i < `size $phonemeList` ; $i++){
+      setAttr $phonemeList[$i] 0.0;
+      setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 0.0;
+    }
+
+  if ($animPhoneme == "IH"){
+    setAttr "PhonemeController.IH" 1;
+  }
+
+  else if ($animPhoneme == "OO"){
+    setAttr "PhonemeController.OO" 1;
+    setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 2.94;
+  }
+
+  else if ($animPhoneme == "EE"){
+   setAttr "PhonemeController.EE" 1;
+   setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 1.3;
+  }
+
+  else if ($animPhoneme == "SH"){
+    setAttr "PhonemeController.SH" 1;
+
+  }
+
+  else if ($animPhoneme == "R"){
+    setAttr "PhonemeController.R" 1;
+  }
+
+  else if ($animPhoneme == "F"){
+    setAttr "PhonemeController.F" 1;
+  }
+
+  else if ($animPhoneme == "TH"){
+    setAttr "PhonemeController.TH" 1;
+    setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 2.2;
+  }
+
+  else if ($animPhoneme == "AH"){
+    setAttr "PhonemeController.AH" 1;
+    setAttr "cn_head_cn_head_low_jaw_jnt_jnt.rx" 4.6;
+  }
+
+  else if ($animPhoneme == "EH"){
+    setAttr "PhonemeController.EH" 1;
+  }
+
+  else{
+    print "Zero's alllllll";
+  }
+}
+
+global proc ecKeyPhoneme(){
+  string $phonemeList[] = {"PhonemeController.OO" , "PhonemeController.R" , "PhonemeController.IH" , "PhonemeController.EE" , "PhonemeController.SH" , "PhonemeController.F" , "PhonemeController.TH" , "PhonemeController.AH" , "PhonemeController.EH"};
+  for ($i = 0; $i < `size $phonemeList` ; $i++){
+      setKeyframe $phonemeList[$i];
+    }
+  setKeyframe "cn_head_cn_head_low_jaw_jnt_jnt.rx";
+}
+
+global proc ecOffsets(string $perform , string $control){
+  string $offsets[] = {"rt_up_eye_inner_offset" , "rt_up_eye_mid_offset" , "rt_up_eye_outer_offset" , "rt_low_eye_inner_offset" , "rt_low_eye_mid_offset" , "rt_low_eye_outer_offset" , "rt_nose_offset" , "rt_upper_cheek_offset" , "rt_outer_cheek_offset" , "rt_low_cheek_offset" , "rt_mouth_outer_offset", "rt_mouth_up_outermid_offset" , "rt_mouth_up_innermid_offset" , "cn_mouth_center_up_offset" , "rt_mouth_low_outermid_offset" , "rt_mouth_low_innermid_offset" ,  "rt_mouth_outer_offset" , "cn_mouth_center_low_offset" , "cn_mouth_center_up_offset" , "lf_up_eye_inner_offset" , "lf_up_eye_mid_offset" , "lf_up_eye_outer_offset" , "lf_low_eye_inner_offset" , "lf_low_eye_mid_offset" , "lf_low_eye_outer_offset" , "lf_nose_offset" , "lf_upper_cheek_offset" , "lf_outer_cheek_offset" , "lf_low_cheek_offset" , "lf_mouth_outer_offset", "lf_mouth_up_outermid_offset" , "lf_mouth_up_innermid_offset" , "cn_mouth_center_up_offset" , "lf_mouth_low_outermid_offset" , "lf_mouth_low_innermid_offset" ,  "lf_mouth_outer_offset"};
+
+  if($perform == "zeroall"){
+    for ($i = 0; $i < `size $offsets` ; $i++){
+      setAttr ($offsets[$i] + ".tx") 0.0;
+      setAttr ($offsets[$i] + ".ty") 0.0;
+      setAttr ($offsets[$i] + ".tz") 0.0;
+
+      setAttr ($offsets[$i] + ".rx") 0.0;
+      setAttr ($offsets[$i] + ".ry") 0.0;
+      setAttr ($offsets[$i] + ".rz") 0.0;
+    }
+  }
+
+  else if($perform == "keyall"){
+    for ($i = 0; $i < `size $offsets` ; $i++){
+      setKeyframe ($offsets[$i] + ".tx");
+      setKeyframe ($offsets[$i] + ".ty");
+      setKeyframe ($offsets[$i] + ".tz");
+
+      setKeyframe ($offsets[$i] + ".rx");
+      setKeyframe ($offsets[$i] + ".ry");
+      setKeyframe ($offsets[$i] + ".rz");
+
+      }
+  }
+
+  else if($perform == "keyselected"){
+    string $selection[] = `ls -sl`;
+    for ($i = 0; $i < `size $selection` ; $i++){
+    setKeyframe ($selection[$i] + ".tx");
+    setKeyframe ($selection[$i] + ".ty");
+    setKeyframe ($selection[$i] + ".tz");
+    
+    setKeyframe ($selection[$i] + ".rx");
+    setKeyframe ($selection[$i] + ".ry");
+    setKeyframe ($selection[$i] + ".rz");
+    }
+  }
+
+  else if($perform == "zeroselected"){
+    string $selection[] = `ls -sl`;
+    for ($i = 0; $i < `size $selection` ; $i++){
+      setAttr ($selection[$i] + ".tx") 0.0;
+      setAttr ($selection[$i] + ".ty") 0.0;
+      setAttr ($selection[$i] + ".tz") 0.0;
+
+      setAttr ($selection[$i] + ".rx") 0.0;
+      setAttr ($selection[$i] + ".ry") 0.0;
+      setAttr ($selection[$i] + ".rz") 0.0;
+    }
+  }
+
+  else{
+    print "rats";
+  }
+
+}
+//START GUI
+
+if(`window -ex "mw"`) {
+    deleteUI "mw";
+}
+window -menuBar true -title "ec Easy Facial Rig Animation Controls" -widthHeight 490 600 -sizeable false mw ;
+menu -label "Global";
+      menuItem -label "Zero Visemes" -command "ecPhoneme(\"null\")";
+			menuItem -label "Zero Jaw Only" -command "ecZero(4, \"null\");";
+			menuItem -label "Zero Mouth Only" -command "ecZero(3, \"null\");";
+			menuItem -label "Zero Face Only" -command "ecZero(2,\"null\");";
+      menuItem -label "Zero Facial Offsets Only" -command "ecOffsets(\"zeroall\" , \"null\");";
+      menuItem -label "Zero All" -command "ecZero(1,\"null\");";
+            menuItem -divider true;
+      menuItem -label "Key Visemes Only" -command "ecKeyPhoneme;";
+      menuItem -label "Key Jaw Only" -command "setKeyframe cn_head_low_jaw_jnt;";
+      menuItem -label "Key Mouth Only" -command "ecKey(3);";
+      menuItem -label "Key Face Only" -command "ecKey(2);";
+      menuItem -label "Key Facial Offsets Only" -command "ecOffsets(\"keyall\" , \"null\");";
+      menuItem -label "Key All" -command "ecKey(1);";
+            menuItem -divider true;
+      menuItem -subMenu true -label "Pose";
+      	menuItem -label "Save Pose" -command "ecExportWindow; ";
+      	menuItem -label "Load Pose";
+
+menu -label "Options";
+            menuItem -subMenu true -label "Visibility";
+            	menuItem -label "Visemes" -cb true -c"";
+           	    menuItem -label "Mouth Morphs" -cb true -c "";
+           	    menuItem -label "Lip Morphs" -cb true -c "";
+           	    menuItem -label "Face Morphs" -cb true -c "";
+
+ 	string $scrollLayout = `scrollLayout
+        -horizontalScrollBarThickness 16
+        -verticalScrollBarThickness   16`;
+	
+	frameLayout -label "Visemes & Jaw" -collapsable true -borderStyle "etchedIn" "PhonemesFrame";
+	    setParent;
+	    rowLayout -numberOfColumns 4 -columnAlign3 "left" "center" "right" "right";
+	   		columnLayout;
+	   			button -width 110 -height 50 -label "OO" -c "ecPhoneme(\"OO\")";
+	   			button -width 110 -height 50 -label "EE" -c "ecPhoneme(\"EE\")";
+	   			button -width 110 -height 50 -label "SH" -c "ecPhoneme(\"SH\")";
+	   		setParent..;
+	    	columnLayout;
+	    		button -width 110 -height 50 -label "R" -c "ecPhoneme(\"R\")";
+	    		button -width 110 -height 50 -label "IH" -c "ecPhoneme(\"IH\")";
+	    		button -width 110 -height 50 -label "F" -c "ecPhoneme(\"F\")";
+	    	setParent..;
+	    	columnLayout;
+	    		button -width 110 -height 50 -label "TH_L_G" -c "ecPhoneme(\"TH\")";
+	    		button -width 110 -height 50 -label "AH" -c "ecPhoneme(\"AH\")";
+	    		button -width 110 -height 50 -label "EH" -c "ecPhoneme(\"EH\")";
+	    	setParent..;
+	    	columnLayout;
+	    		button -width 110 -height 50 -label "Key Viseme" -c "ecKeyPhoneme";
+          button -width 110 -height 50 -label "Zero Viseme" -c "ecPhoneme(\"null\")";
+	    	setParent -top;
+	    columnLayout "JawColumn";
+	    	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+	    	columnLayout;
+	    		floatSliderButtonGrp -label "Jaw Open" -min -3.0 -max 12 -field true -buttonLabel "key" -buttonCommand "setKeyframe cn_head_low_jaw_jnt" cn_head_low_jaw_jnt_slide;
+	    			connectControl cn_head_low_jaw_jnt_slide cn_head_cn_head_low_jaw_jnt_jnt.rx;
+	    	setParent..;
+	    	columnLayout;
+	    		button -label "zero" -command "ecZero(4,\"null\");";
+        setParent -top;
+        frameLayout -label "Offset Controls" -collapsable true -borderStyle "etchedIn" "offsetframe";
+        rowLayout -numberOfColumns 2 -columnAlign2 "left" "right" "offsetrow";
+        setParent "offsetrow";
+        columnLayout;
+          button -label "Zero Selected Offset Control" -width 220 -height 50 -c "ecOffsets(\"zeroselected\", \"null\");";
+        setParent "offsetrow";
+        columnLayout;
+          button -label "Key Selected Offset Control" -width 220 -height 50 -c "ecOffsets(\"keyselected\", \"null\");";
+
+
+    setParent -top;
+    columnLayout -adjustableColumn true;
+    	frameLayout -label "Mouth Morphs" -collapsable true -borderStyle "etchedIn" "MouthMorphFrame"; 
+    		frameLayout -label "Mouth Up" -collapsable true -borderStyle "etchedIn";
+               rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+               columnLayout;                
+                //Mouth UP
+                        floatSliderButtonGrp -label "Mouth Up Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthup_M"  mouthdown_m_slide;
+               connectControl mouthdown_m_slide Mouth_Morph.mouthup_M;
+
+                       floatSliderButtonGrp -label "Mouth Up Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthup_Lft"  mouthdown_lft_slide;
+               connectControl mouthdown_lft_slide Mouth_Morph.mouthup_Lft;
+
+               			floatSliderButtonGrp -label "Mouth Up Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthup_Rgt"  mouthdown_rgt_slide;
+               connectControl mouthdown_rgt_slide Mouth_Morph.mouthup_Rgt;
+               	setParent..;
+               	columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthup_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthup_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthup_Rgt\");";
+               	setParent..;
+         	setParent..;
+         setParent..;
+
+
+            frameLayout -label "Mouth Down" -collapsable true -borderStyle "etchedIn";
+                rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+                columnLayout; 
+               	//Mouth DOWN
+               			floatSliderButtonGrp -label "Mouth Down Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthdown_M"  mouthdown_m_slide;
+               connectControl mouthdown_m_slide Mouth_Morph.mouthdown_M;
+
+                        floatSliderButtonGrp -label "Mouth Down Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthdown_Lft"  mouthdown_lft_slide;
+               connectControl mouthdown_lft_slide Mouth_Morph.mouthdown_Lft;
+
+               			floatSliderButtonGrp -label "Mouth Down Rgt" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthdown_Rgt"  mouthdown_rgt_slide;
+               connectControl mouthdown_rgt_slide Mouth_Morph.mouthdown_Rgt;
+               	setParent..;
+               	columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthdown_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthdown_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthdown_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Mouth Height" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+         		//Mouth HEIGHT
+               			floatSliderButtonGrp -label "Mouth Height Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_height_M"  mouth_height_m_slide;
+               connectControl mouth_height_m_slide Mouth_Morph.mouth_height_M;
+
+               			floatSliderButtonGrp -label "Mouth Height Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_height_Lft"  mouth_height_lft_slide;
+               connectControl mouth_height_lft_slide Mouth_Morph.mouth_height_Lft;
+
+               			floatSliderButtonGrp -label "Mouth Height Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_height_Rgt"  mouth_height_rgt_slide;
+               connectControl mouth_height_rgt_slide Mouth_Morph.mouth_height_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_height_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_height_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_height_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Mouth Width" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//Mouth WIDTH
+               			floatSliderButtonGrp -label "Mouth Width Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_width_M"  mouth_width_m_slide;
+               connectControl mouth_width_m_slide Mouth_Morph.mouth_width_M;
+
+               			floatSliderButtonGrp -label "Mouth Width Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_width_Lft"  mouth_width_lft_slide;
+               connectControl mouth_width_lft_slide Mouth_Morph.mouth_width_Lft;
+
+               			floatSliderButtonGrp -label "Mouth Width Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_width_Rgt"  mouth_width_rgt_slide;
+               connectControl mouth_width_rgt_slide Mouth_Morph.mouth_width_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_width_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_width_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_width_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Mouth Narrow" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//Mouth NARROW
+               			floatSliderButtonGrp -label "Mouth Narrow Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_narrow_M"  mouth_narrow_m_slide;
+               connectControl mouth_narrow_m_slide Mouth_Morph.mouth_narrow_M;
+
+               			floatSliderButtonGrp -label "Mouth Narrow Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_narrow_Lft"  mouth_narrow_lft_slide;
+               connectControl mouth_narrow_lft_slide Mouth_Morph.mouth_narrow_Lft;
+
+               			floatSliderButtonGrp -label "Mouth Narrow Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouth_narrow_Rgt"  mouth_narrow_rgt_slide;
+               connectControl mouth_narrow_rgt_slide Mouth_Morph.mouth_narrow_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_narrow_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_narrow_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouth_narrow_Rgt\");";
+               	setParent..;
+                setParent..;
+                setParent..;
+
+            frameLayout -label "Mouth Corner Depth" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//Mouth DEPTH
+               			floatSliderButtonGrp -label "Mouth Corner Depth Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthcornerdepth_M"  mouthcornerdepth_m_slide;
+               connectControl mouthcornerdepth_m_slide Mouth_Morph.mouthcornerdepth_M;
+
+               			floatSliderButtonGrp -label "Mouth Corner Depth Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthcornerdepth_Lft"  mouthcornerdepth_lft_slide;
+               connectControl mouthcornerdepth_lft_slide Mouth_Morph.mouthcornerdepth_Lft;
+
+               			floatSliderButtonGrp -label "Mouth Corner Depth Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.mouthcornerdepth_Rgt"  mouthcornerdepth_rgt_slide;
+               connectControl mouthcornerdepth_rgt_slide Mouth_Morph.mouthcornerdepth_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthcornerdepth_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthcornerdepth_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.mouthcornerdepth_Rgt\");";
+               	setParent..;
+                setParent..;
+                setParent..;
+
+
+
+//LIP MORPH COLUMN LAYOUT BEGIN---------------------------------------
+
+
+    columnLayout -adjustableColumn true;
+    	setParent -top;
+      	frameLayout -label "Lip Morphs" -collapsable true -borderStyle "etchedIn" "LipMorphFrame";
+      		frameLayout -label "Upper Lip Raise" -collapsable true -borderStyle "etchedIn";
+      			rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+               columnLayout;                
+                //UpperlipRaise
+                        floatSliderButtonGrp -label "Upper Lip Raise Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipup_M"  lipup_m_slide;
+               connectControl lipup_m_slide Mouth_Morph.lipup_M;
+
+                       floatSliderButtonGrp -label "Upper Lip Raise Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipup_Lft"  lipup_lft_slide;
+               connectControl lipup_lft_slide Mouth_Morph.lipup_Lft;
+
+               			floatSliderButtonGrp -label "Upper Lip Raise Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipup_Rgt"  lipup_rgt_slide;
+               connectControl lipup_rgt_slide Mouth_Morph.lipup_Rgt;
+               	setParent..;
+               	columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipup_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipup_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipup_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Lower Lip Drop" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+               	//LowerlipDrop
+               			floatSliderButtonGrp -label "Lower Lip Drop Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipdown_M"  lipdown_m_slide;
+               connectControl lipdown_m_slide Mouth_Morph.lipdown_M;
+
+                        floatSliderButtonGrp -label "Lower Lip Drop Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipdown_Lft"  lipdown_lft_slide;
+               connectControl lipdown_lft_slide Mouth_Morph.lipdown_Lft;
+
+               			floatSliderButtonGrp -label "Lower Lip Drop Rgt" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipdown_Rgt"  lipdown_rgt_slide;
+               connectControl lipdown_rgt_slide Mouth_Morph.lipdown_Rgt;
+               	setParent..;
+               	columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipdown_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipdown_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipdown_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Lips In: Upper" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+         		//LipsinUpper
+               			floatSliderButtonGrp -label "Lips in: Upper Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsin_up_M"  lipsin_up_m_slide;
+               connectControl lipsin_up_m_slide Mouth_Morph.lipsin_up_M;
+
+               			floatSliderButtonGrp -label "Lips in: Upper Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsin_up_Lft"  lipsin_up_lft_slide;
+               connectControl lipsin_up_lft_slide Mouth_Morph.lipsin_up_Lft;
+
+               			floatSliderButtonGrp -label "Lips in: Upper Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsin_up_Rgt"  lipsin_up_rgt_slide;
+               connectControl lipsin_up_rgt_slide Mouth_Morph.lipsin_up_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsin_up_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsin_up_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsin_up_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Lips In: Lower" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//LipsinLower
+               			floatSliderButtonGrp -label "Lips In: Lower Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsin_low_Rgt"  lipsin_low_m_slide;
+               connectControl lipsin_low_m_slide Mouth_Morph.lipsin_low_M;
+
+               			floatSliderButtonGrp -label "Lips In: Lower Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsin_low_Lft"  lipsin_low_lft_slide;
+               connectControl lipsin_low_lft_slide Mouth_Morph.lipsin_low_Lft;
+
+               			floatSliderButtonGrp -label "Lips In: Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsin_low_Rgt"  lipsin_low_rgt_slide;
+               connectControl lipsin_low_rgt_slide Mouth_Morph.lipsin_low_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsin_low_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsin_low_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsin_low_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Lips Out: Upper" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//LipsOutUpper
+               			floatSliderButtonGrp -label "Lips Out: Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsout_up_M"  lipsout_up_m_slide;
+               connectControl lipsout_up_m_slide Mouth_Morph.lipsout_up_M;
+
+               			floatSliderButtonGrp -label "Lips Out: Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsout_up_Lft"  lipsout_up_lft_slide;
+               connectControl lipsout_up_lft_slide Mouth_Morph.lipsout_up_Lft;
+
+               			floatSliderButtonGrp -label "Lips Out: Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsout_up_Rgt"  lipsout_up_rgt_slide;
+               connectControl lipsout_up_rgt_slide Mouth_Morph.lipsout_up_Rgt;
+               setParent..;columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsout_up_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsout_up_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsout_up_Rgt\");";
+               	setParent..;
+                setParent..;
+                setParent..;
+
+            frameLayout -label "Lips Out: Lower" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//LipsoutLower
+               			floatSliderButtonGrp -label "Lips Out: Lower Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsout_low_M"  lipsout_low_m_slide;
+               connectControl lipsout_low_m_slide Mouth_Morph.lipsout_low_M;
+
+               			floatSliderButtonGrp -label "Lips Out: Lower Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsout_low_Lft"  lipsout_low_lft_slide;
+               connectControl lipsout_low_lft_slide Mouth_Morph.lipsout_low_Lft;
+
+               			floatSliderButtonGrp -label "Lips Out: Lower Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Mouth_Morph.lipsout_low_Rgt"  lipsout_low_rgt_slide;
+               connectControl lipsout_low_rgt_slide Mouth_Morph.lipsout_low_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsout_low_M\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsout_low_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Mouth_Morph.lipsout_low_Rgt\");";
+               	setParent..;
+            setParent -top;
+
+//Face Morph GUI BEGIN
+  columnLayout -adjustableColumn true;
+    	setParent -top;
+      	frameLayout -label "Face Morphs" -collapsable true -borderStyle "etchedIn" "FaceMorphFrame";
+      		frameLayout -label "Mid Brow Height" -collapsable true -borderStyle "etchedIn";
+      			rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+               columnLayout;                
+                //UpperlipRaise
+                        floatSliderButtonGrp -label "Mid Brow Height Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.browmidheight_M"  browmidheight_m_slide;
+               connectControl browmidheight_m_slide Face_Morph.browmidheight_M;
+
+                       floatSliderButtonGrp -label "Mid Brow Height Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.browmidheight_Lft"  browmidheight_lft_slide;
+               connectControl browmidheight_lft_slide Face_Morph.browmidheight_Lft;
+
+               			floatSliderButtonGrp -label "Mid Brow Height Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.browmidheight_Rgt"  browmidheight_rgt_slide;
+               connectControl browmidheight_rgt_slide Face_Morph.browmidheight_Rgt;
+               	setParent..;
+               	columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.browmidheight_M\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.browmidheight_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.browmidheight_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Outer Brow Height" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+               	//LowerlipDrop
+               			floatSliderButtonGrp -label "Outer Brow Height Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.browouterheight_M"  browouterheight_m_slide;
+               connectControl browouterheight_m_slide Face_Morph.browouterheight_M;
+
+                        floatSliderButtonGrp -label "Outer Brow Height Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.browouterheight_Lft"  browouterheight_lft_slide;
+               connectControl browouterheight_lft_slide Face_Morph.browouterheight_Lft;
+
+               			floatSliderButtonGrp -label "Outer Brow Height Rgt" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.browouterheight_Rgt"  browouterheight_rgt_slide;
+               connectControl browouterheight_rgt_slide Face_Morph.browouterheight_Rgt;
+               	setParent..;
+               	columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.browouterheight_M\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.browouterheight_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.browouterheight_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Brow Squeeze" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+         		//LipsinUpper
+               			floatSliderButtonGrp -label "Brow Squeeze Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.brow_squeeze_M"  brow_squeeze_m_slide;
+               connectControl brow_squeeze_m_slide Face_Morph.brow_squeeze_M;
+
+               			floatSliderButtonGrp -label "Brow Squeeze Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.brow_squeeze_Lft"  brow_squeeze_lft_slide;
+               connectControl brow_squeeze_lft_slide Face_Morph.brow_squeeze_Lft;
+
+               			floatSliderButtonGrp -label "Brow Squeeze Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.brow_squeeze_Rgt"  brow_squeeze_rgt_slide;
+               connectControl brow_squeeze_rgt_slide Face_Morph.brow_squeeze_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.brow_squeeze_M\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.brow_squeeze_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.brow_squeeze_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Nose Wrinkle" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//LipsinLower
+               			floatSliderButtonGrp -label "Nose Wrinkle Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.nosewrinkle_Rgt"  nosewrinkle_m_slide;
+               connectControl nosewrinkle_m_slide Face_Morph.nosewrinkle_M;
+
+               			floatSliderButtonGrp -label "Nose Wrinkle Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.nosewrinkle_Lft"  nosewrinkle_lft_slide;
+               connectControl nosewrinkle_lft_slide Face_Morph.nosewrinkle_Lft;
+
+               			floatSliderButtonGrp -label "Nose Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.nosewrinkle_Rgt"  nosewrinkle_rgt_slide;
+               connectControl nosewrinkle_rgt_slide Face_Morph.nosewrinkle_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.nosewrinkle_M\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.nosewrinkle_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.nosewrinkle_Rgt\");";
+               	setParent..;
+               	setParent..;
+               	setParent..;
+
+            frameLayout -label "Cheek Flex" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//LipsOutUpper
+               			floatSliderButtonGrp -label "Cheek Flex Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.cheekflex_M"  cheekflex_m_slide;
+               connectControl cheekflex_m_slide Face_Morph.cheekflex_M;
+
+               			floatSliderButtonGrp -label "Cheek Flex Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.cheekflex_Lft"  cheekflex_lft_slide;
+               connectControl cheekflex_lft_slide Face_Morph.cheekflex_Lft;
+
+               			floatSliderButtonGrp -label "Cheek Flex Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.cheekflex_Rgt"  cheekflex_rgt_slide;
+               connectControl cheekflex_rgt_slide Face_Morph.cheekflex_Rgt;
+               setParent..;columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.cheekflex_M\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.cheekflex_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.cheekflex_Rgt\");";
+               	setParent..;
+                setParent..;
+                setParent..;
+
+            frameLayout -label "Sneer" -collapsable true -borderStyle "etchedIn";
+            	rowLayout -numberOfColumns 2 -columnAlign2 "center" "left";
+            	columnLayout; 
+            	//LipsoutLower
+               			floatSliderButtonGrp -label "Sneer Master" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.sneer_M"  sneer_m_slide;
+               connectControl sneer_m_slide Face_Morph.sneer_M;
+
+               			floatSliderButtonGrp -label "Sneer Left" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.sneer_Lft"  sneer_lft_slide;
+               connectControl sneer_lft_slide Face_Morph.sneer_Lft;
+
+               			floatSliderButtonGrp -label "Sneer Right" -min -1.5 -max 1.5 -field true -buttonLabel "key"
+                       -buttonCommand "setKeyframe Face_Morph.sneer_Rgt"  sneer_rgt_slide;
+               connectControl sneer_rgt_slide Face_Morph.sneer_Rgt;
+               setParent..;
+               columnLayout;
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.sneer_M\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.sneer_Lft\");";
+               		button -label "zero" -command "ecZero(0,\"Face_Morph.sneer_Rgt\");";
+               	setParent..;
+            setParent -top;
+         showWindow mw;
