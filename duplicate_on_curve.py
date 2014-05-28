@@ -1,6 +1,5 @@
 import pymel.core as py
 from pymel.core.uitypes import IntSliderGrp
-import maya.cmds as mc
 
 
 class DuplicateOnCurve(object):
