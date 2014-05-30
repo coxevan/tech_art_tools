@@ -12,7 +12,7 @@ class DuplicateOnCurve(object):
         self.motion_path = ''
         self.dup_obj = kwargs.setdefault('objToDuplicate')
         self.curve_obj = kwargs.setdefault('curve')
-        gui_bool = kwargs.setdefault('gui', False)
+        gui_bool = kwargs.setdefault('gui', True)
         if gui_bool is True:
             self.create_gui()
         else:
