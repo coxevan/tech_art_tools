@@ -1,25 +1,25 @@
 import pymel.core as py
 from pymel.core.uitypes import IntSliderGrp
-import maya.cmds as mc
 
 
 class DuplicateOnCurve(object):
-    def __init__(self):
-        self.frame_count = 3
+    def __init__(self, **kwargs):
+        self.frame_count = kwargs.setdefault('numberOfDuplicates')
         self.int_slider = ''
         self.objects = []
         self.parent_check = ''
+        self.parent_bool = False
         self.motion_path = ''
-        try:
-            self.dup_obj, self.curve_obj = py.ls(sl=True)
+        self.dup_obj = kwargs.setdefault('objToDuplicate')
+        self.curve_obj = kwargs.setdefault('curve')
+        gui_bool = kwargs.setdefault('gui', False)
+        if gui_bool is True:
             self.create_gui()
+        else:
             self.create_first_set()
-        except ValueError:
-            mc.headsUpMessage('Select object to duplicate, then curve to duplicate along.')
-        except:
-            raise
 
     def create_gui(self):
+        self.create_first_set()
         window = 'creation_gui'
         window_title = 'Duplicate Along Curve'
         window_size = (337, 245)
@@ -51,23 +51,23 @@ class DuplicateOnCurve(object):
         except:
             pass
         self.frame_count = self.int_slider.getValue()
+        self.parent_bool = self.parent_check.getValue1()
         self.motion_path = py.pathAnimation(self.dup_obj, self.curve_obj, stu=1, etu=self.frame_count)
         self.objects = []
         py.keyTangent(self.motion_path+'_uValue', index=(0, 1), inTangentType='linear')
         py.keyTangent(self.motion_path+'_uValue', index=(0, 1), outTangentType='linear')
         print "frame count = " + str(self.frame_count)
+
         self.creation_loop()
 
     def creation_loop(self):
         count = 0
-        for i in range(1, self.frame_count+1):
+        for i in xrange(1, self.frame_count+1):
             py.currentTime(i)
             self.objects.append(py.duplicate(self.dup_obj))
             count += 1
-        if self.parent_check.getValue1() is True:
-            for i in range(1, len(self.objects)):
+        if self.parent_bool is True:
+            for i in xrange(1, len(self.objects)):
                 py.parent(self.objects[i], self.objects[i-1])
             print "made: " + str(count)
         py.delete(self.motion_path)
-
-gui_inst = DuplicateOnCurve()
