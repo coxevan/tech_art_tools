@@ -70,4 +70,10 @@ class DuplicateOnCurve(object):
             for i in xrange(1, len(self.objects)):
                 py.parent(self.objects[i], self.objects[i-1])
             print "made: " + str(count)
+<<<<<<< HEAD
         py.delete(self.motion_path)
+=======
+        py.delete(self.motion_path)
+
+gui_inst = DuplicateOnCurve()
+>>>>>>> 71b5da0757926c6ac0ca9d5e97364b40c95099c3
