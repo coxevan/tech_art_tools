@@ -9,6 +9,10 @@ Current collection features:
 
 EcFaceRig : Automatic facial rigging set up script.
 
+SplashBoard : Easily manage images in Maya.
+
+PyGhost : Work with less distracting, custom animation ghosts quickly!
+
 duplicate_on_curve : Creates duplicates of objects along the path of a curve. Great for creating joint chains.
 
 ecSDKMirror : Set Driven Key utility makes mirroring and copying of SDK's easy and fast.
